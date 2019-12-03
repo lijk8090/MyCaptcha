@@ -1,5 +1,6 @@
 package cn.com.infosec.mycaptcha.controller;
 
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.wf.captcha.SpecCaptcha;
 import com.wf.captcha.utils.CaptchaUtil;
+
+import cn.apiclub.captcha.Captcha;
+import cn.apiclub.captcha.servlet.CaptchaServletUtil;
 
 @Controller
 public class CaptchaController {
@@ -56,6 +60,21 @@ public class CaptchaController {
 			response.getWriter().write("true");
 		}
 		response.getWriter().close();
+	}
+
+	@RequestMapping("simpleCaptcha.do")
+	public void simpleCaptchaController(HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+		Captcha captcha = new Captcha.Builder(200, 50).addText().addBackground().addBorder().build();
+		CaptchaServletUtil.writeImage(response, captcha.getImage());
+
+		request.getSession().setAttribute("simpleCaptcha", captcha.getAnswer());
+		logger.info("Simple Captcha Succeed: " + captcha.getAnswer());
+
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		md.update(captcha.getAnswer().getBytes());
+		logger.info("{}", md.digest());
+
 	}
 
 }
